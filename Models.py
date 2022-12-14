@@ -1,11 +1,8 @@
 from peewee import *
+import DBAccessInfo
 
-mysql_db = MySQLDatabase(
-    host='203.255.57.227',
-    user='amugae',
-    password='AMUGAE!!!amg1234',
-    database='AMUGAE'
-)
+mysql_db = MySQLDatabase(**DBAccessInfo.access_info)
+
 
 class BaseModel(Model):
     class Meta:
@@ -20,7 +17,7 @@ class Sector(BaseModel):
 class Stock(BaseModel):
     stock_code = CharField(primary_key=True)
     volume = IntegerField()
-    marketsum = IntegerField()
+    market_sum = IntegerField()
 
 
 class Company(BaseModel):
@@ -51,3 +48,7 @@ class FinancialStatements(BaseModel):
 
     class Meta:
         primary_key = CompositeKey('stock_code', 'year')
+
+
+if __name__ == "__main__":
+    pass

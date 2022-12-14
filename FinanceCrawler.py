@@ -2,6 +2,7 @@
 from bs4 import BeautifulSoup as bs
 import pandas as pd
 import requests
+from Models import *
 
 # Just for giving result hint.
 class URL:
@@ -10,22 +11,21 @@ class HTML:
     pass
 class StockCode:
     pass
-#---------------------------------------
+
 
 class Crawler:
     def __init__(self) -> None:
-        self.__url = ""
-        self.__html = None
+        self.__cache = {}
 
     def parse(self, url) -> HTML:
         # header to certificate "Not bot"
-        if self.__url == url: return self.__html
+        if self.__cache.get(url):
+            return self.__cache[url]
+
         html = bs(requests.get(url, headers={'User-agent': 'Mozilla/5.0'}).text, 'html.parser')
+        self.__cache[url] = html
 
-        self.__url = url
-        self.__html = html
-
-        return self.__html 
+        return self.__cache[url]
 
 class URLCrawler(Crawler):
     def __init__(self):
