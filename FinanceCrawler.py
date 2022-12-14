@@ -19,15 +19,19 @@ class Crawler:
 
         return self.__cache[url]
 
+
 class URLCrawler(Crawler):
+    __SECTOR_URL = "https://finance.naver.com/sise/sise_group.nhn?type=upjong"
+    __COMPANY_URL = "https://finance.naver.com/item/main.naver?code="
+    __MAIN_URL = "https://finance.naver.com"
+
     def __init__(self):
         super().__init__()
         self.__sector_to_url = {}
         self.__company_to_url = {}
     
     def get_sector_url(self) -> str:
-        url = "https://finance.naver.com/sise/sise_group.nhn?type=upjong"
-        return url
+        return self.__SECTOR_URL
     
     def get_sector_to_url(self) -> dict({Sector: str}):
         return self.crawl_sector_to_urls()
@@ -36,8 +40,7 @@ class URLCrawler(Crawler):
         return self.make_sector_to_id()
 
     def get_company_url(self, stock_code) -> str:
-        url = f"https://finance.naver.com/item/main.naver?code={stock_code}"
-        return url
+        return f"{self.__COMPANY_URL}{stock_code}"
     
     def get_company_to_url(self) -> dict({Company: str}):
         return self.crawl_company_to_url()
@@ -54,7 +57,7 @@ class URLCrawler(Crawler):
             link = url['href']
             if self.is_sector_url(link):
                 name = url.get_text()
-                sector_to_url[name] = f"https://finance.naver.com{link}"
+                sector_to_url[name] = f"{self.__MAIN_URL}{link}"
 
         # for caching
         self.__sector_to_url = sector_to_url
