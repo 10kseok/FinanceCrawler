@@ -4,20 +4,12 @@ import pandas as pd
 import requests
 from Models import *
 
-# Just for giving result hint.
-class URL:
-    pass
-class HTML:
-    pass
-class StockCode:
-    pass
-
 
 class Crawler:
     def __init__(self) -> None:
         self.__cache = {}
 
-    def parse(self, url) -> HTML:
+    def parse(self, url) -> bs:
         # header to certificate "Not bot"
         if self.__cache.get(url):
             return self.__cache[url]
@@ -33,24 +25,24 @@ class URLCrawler(Crawler):
         self.__sector_to_url = {}
         self.__company_to_url = {}
     
-    def get_sector_url(self) -> URL:
+    def get_sector_url(self) -> str:
         url = "https://finance.naver.com/sise/sise_group.nhn?type=upjong"
         return url
     
-    def get_sector_to_url(self) -> dict({Sector: URL}):
+    def get_sector_to_url(self) -> dict({Sector: str}):
         return self.crawl_sector_to_urls()
     
     def get_sector_to_id(self) -> dict({Sector: id}):
         return self.make_sector_to_id()
 
-    def get_company_url(self, stock_code) -> URL:
+    def get_company_url(self, stock_code) -> str:
         url = f"https://finance.naver.com/item/main.naver?code={stock_code}"
         return url
     
-    def get_company_to_url(self) -> dict({Company: URL}):
+    def get_company_to_url(self) -> dict({Company: str}):
         return self.crawl_company_to_url()
     
-    def crawl_sector_to_urls(self) -> list([URL]):
+    def crawl_sector_to_urls(self) -> list([str]):
         # (업종마다 나눠진 회사들을 보기위해) 업종별 링크수집 {업종 : 업종Link}
         if len(self.__sector_to_url) != 0: return self.__sector_to_url
 
@@ -69,7 +61,7 @@ class URLCrawler(Crawler):
 
         return sector_to_url
     
-    def crawl_company_to_url(self) -> dict({Company: URL}):
+    def crawl_company_to_url(self) -> dict({Company: str}):
         # 각 회사별 (종목정보를 볼 수 있는)링크 수집 {회사명: 종목Link}
         if len(self.__company_to_url) != 0: return self.__company_to_url
         
@@ -145,11 +137,11 @@ class CompanyCrawler(URLCrawler):
     def get_sector_to_company(self) -> dict({Sector: Company}):
         return self.crawl_sector_to_company_all()
        
-    def get_company_to_stock_code(self) -> dict({Company: StockCode}):
+    def get_company_to_stock_code(self) -> dict({Company: str}):
         return self.crawl_company_to_stock_code()
 
     def get_financial_statements(self, stock_code):
-        return self.crawl_financial_statements_specific_company(stock_code)
+        return self.scrap_financial_statements_specific_company(stock_code)
 
     def crawl_company_in(self, sector) -> list([Company]):
         # 입력받은 업종에 포함되어 있는 회사들 수집
@@ -163,7 +155,7 @@ class CompanyCrawler(URLCrawler):
         
         return company_list
     
-    def crawl_company_to_stock_code(self) -> dict({Company: StockCode}):
+    def crawl_company_to_stock_code(self) -> dict({Company: str}):
         # 종목코드 수집
         if len(self.__company_to_stock_code) != 0: return self.__company_to_stock_code
         
@@ -194,7 +186,7 @@ class CompanyCrawler(URLCrawler):
         
         return sector_to_company
         
-    def crawl_financial_statements_specific_company(self, stock_code) -> FinancialStatements:
+    def scrap_financial_statements_specific_company(self, stock_code) -> FinancialStatements:
         table = pd.read_html(f'https://finance.naver.com/item/main.naver?code={stock_code}', encoding='euc-kr')
         # 기업실적분석 테이블만 가져옴
         try:
@@ -216,24 +208,25 @@ class CompanyCrawler(URLCrawler):
 
             return financial_reports_df_3years
     
-    def crawl_financial_statements_all_company(self) -> dict({StockCode: FinancialStatements}):
-        if len(self.__financial_statements) != 0: return self.__financial_statements
+    def scrap_financial_statements_all_company(self) -> dict({str: FinancialStatements}):
+        if len(self.__financial_statements) != 0:
+            return self.__financial_statements
         
         financial_statements = {}
-        stock_codes =  self.get_company_to_stock_code().values()
+        stock_codes = self.get_company_to_stock_code().values()
         
         for stock_code in stock_codes:
-            financial_statements = self.crawl_financial_statements_specific_company(stock_code)
+            financial_statements = self.scrap_financial_statements_specific_company(stock_code)
             financial_statements[stock_code] = financial_statements
         
         self.__financial_statements = financial_statements
         
         return financial_statements
 
-    def find_sector(self, company_name):
+    def find_sector_of(self, company):
         sector_to_company = self.get_sector_to_company().items()
         for sector, companies in sector_to_company:
-            if company_name in companies:
+            if company in companies:
                 return sector
 
 

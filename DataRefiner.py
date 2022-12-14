@@ -36,7 +36,7 @@ class DataRefiner:
         sector_to_id = self.url_crawler.get_sector_to_id()
 
         for company_name, stock_code in company_to_stock_code:
-            sector =  self.company_crawler.find_sector(company_name)
+            sector = self.company_crawler.find_sector_of(company_name)
             if self.is_valid(sector):
                 company = Company(stock_code= stock_code, company_name= company_name, sector_id= sector_to_id[sector])
                 companies.append(company)
@@ -96,22 +96,23 @@ if __name__ == "__main__":
     companies = dr.get_Companies()
     financial_statements = dr.get_Financial_statements()
 
-    mysql_db.connect()
-    # Create Tables
-    mysql_db.create_tables([Stock, Sector, Company, FinancialStatements])
-
-    # For the first time insert, force_insert=True
-    for sector in sectors:
-        sector.save(force_insert=True)
-
-    for stock in stocks:
-        stock.save(force_insert=True)
-
-    for company in companies:
-        company.save(force_insert=True)
-
-    for fs in financial_statements:
-        fs.save(force_insert=True)
-
-    mysql_db.close()
+    # MARK: DB에 데이터 저장과정
+    # mysql_db.connect()
+    # # Create Tables
+    # mysql_db.create_tables([Stock, Sector, Company, FinancialStatements])
+    #
+    # # For the first time insert, force_insert=True
+    # for sector in sectors:
+    #     sector.save(force_insert=True)
+    #
+    # for stock in stocks:
+    #     stock.save(force_insert=True)
+    #
+    # for company in companies:
+    #     company.save(force_insert=True)
+    #
+    # for fs in financial_statements:
+    #     fs.save(force_insert=True)
+    #
+    # mysql_db.close()
 
