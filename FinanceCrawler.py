@@ -194,14 +194,13 @@ class CompanyCrawler(URLCrawler):
         return self.scrap_financial_statements_about(stock_code)
 
     def crawl_company_in(self, sector) -> list([Company]):
-        # FIXME: 203번줄 self.__sector_to_url[sector] private으로 설정되어 접근 못함
         '''
         :param sector: 업종명
         :return: 입력받은 업종에 해당하는 기업들
         '''
         company_list = []
-        html = super().parse(self.__sector_to_url[sector])
-        
+        html = self.parse(self.get_sector_to_url()[sector])
+
         for url in html.find_all('a'):
             link = url['href']
             if link.startswith('/item/main.naver?code='):
@@ -230,6 +229,7 @@ class CompanyCrawler(URLCrawler):
         return company_to_stock_code
                     
     def crawl_sector_to_company_all(self) -> dict({Sector: [Company]}):
+        # TODO: crawl_sector_to_company 메서드를 만들어 단일 섹터:기업들을 반환, 이것을 여러번 호출하여 all 메서드를 만드는 방식으로 변환필요.
         '''
         :return: { 업종 : 업종에 속하는 기업들 }
 
@@ -239,7 +239,7 @@ class CompanyCrawler(URLCrawler):
             return self.__sector_to_company
         
         sector_to_company = {}
-        sectors = super().crawl_sector_to_urls().keys()
+        sectors = self.crawl_sector_to_urls().keys()
         
         for sector in sectors:
             companies = self.crawl_company_in(sector)
