@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup as bs
 import requests
-
+from typing import *
 
 class Crawler:
     def __init__(self) -> None:
@@ -35,19 +35,19 @@ class URLCrawler(Crawler):
     def get_sector_baseurl(self) -> str:
         return self.__SECTOR_BASEURL
 
-    def get_sector_to_url(self) -> dict({str: str}):
+    def get_sector_to_url(self) -> Dict[str, str]:
         return self.crawl_sector_to_urls()
 
-    def get_sector_to_id(self) -> dict({str: id}):
+    def get_sector_to_id(self) -> Dict[str, str]:
         return self.make_sector_to_id()
 
     def get_company_url(self, stock_code) -> str:
         return f"{self.__COMPANY_URL}{stock_code}"
 
-    def get_company_to_url(self) -> dict({str: str}):
+    def get_company_to_url(self) -> Dict[str, str]:
         return self.crawl_company_to_url()
 
-    def crawl_sector_to_urls(self) -> list[str]:
+    def crawl_sector_to_urls(self) -> List[str]:
         '''
          :return: {업종 : 업종Link}
          업종마다 나눠진 기업들을 보기위해 업종별 링크수집
@@ -57,7 +57,7 @@ class URLCrawler(Crawler):
 
         sector_to_url = {}
         url = self.get_sector_baseurl()
-        html = self.parse(url)
+        html = super().parse(url)
 
         for url in html.find_all('a'):
             link = url['href']
@@ -70,7 +70,7 @@ class URLCrawler(Crawler):
 
         return sector_to_url
 
-    def crawl_company_to_url(self) -> dict({str: str}):
+    def crawl_company_to_url(self) -> Dict[str, str]:
         '''
         :return: {회사명: 종목Link}
         업종명을 query에 들어갈 업종id과 맵핑
@@ -81,7 +81,7 @@ class URLCrawler(Crawler):
         company_to_url = {}
 
         for sector_url in self.get_sector_to_url().values():
-            html = self.parse(sector_url)
+            html = super().parse(sector_url)
 
             for company_url in html.find_all('a'):
                 link = company_url['href']
@@ -94,21 +94,21 @@ class URLCrawler(Crawler):
 
         return company_to_url
 
-    def make_sector_to_id(self) -> dict[str, str]:
+    def make_sector_to_id(self) -> Dict[str, str]:
         '''
         :return: { sector : sid } (ex_ {'출판': '314', '가정용품': '297', ...})
-        업종명을 query에 들어갈 업종id과 맵핑
+        업종명을 (query에 들어갈) 업종id과 맵핑
         '''
         sector_to_id = {}
         sector_to_url = self.get_sector_to_url().items()
 
         for name, url in sector_to_url:
-            sid = self.convert_url_to_id(url)
+            sid = self.to_id(url)
             sector_to_id[name] = sid
 
         return sector_to_id
 
-    def convert_url_to_id(self, url) -> str:
+    def to_id(self, url) -> str:
         '''
         :param url: 특정 업종 url
         :return: 업종id(query parameter)

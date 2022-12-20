@@ -35,7 +35,7 @@ class StockCrawler(Crawler):
         :param stock_code: 종목코드
         :return: 입력받은 종목의 시가총액
         '''
-        html = self.parse(self.get_url_of(stock_code))
+        html = super().parse(self.get_url_of(stock_code))
         # remove blank, linespace, tap, dot
         market_sum = int(only_num("".join(html.find(id="_market_sum").text.strip().split())))
         return market_sum
@@ -45,7 +45,7 @@ class StockCrawler(Crawler):
         :param stock_code: 종목코드
         :return: 입력받은 종목의 거래량
         '''
-        html = self.parse(self.get_url_of(stock_code))
+        html = super().parse(self.get_url_of(stock_code))
         volume_tag = html.find_all("td")
         # remove blank, linespace, tap, dot
         volume = int(only_num(volume_tag[2].find(class_="blind").text))
@@ -75,7 +75,7 @@ class CompanyCrawler(URLCrawler):
         :return: 입력받은 업종에 해당하는 기업들
         '''
         company_list = []
-        html = self.parse(self.get_sector_to_url()[sector])
+        html = super().parse(self.get_sector_to_url()[sector])
 
         for url in html.find_all('a'):
             link = url['href']
@@ -115,7 +115,7 @@ class CompanyCrawler(URLCrawler):
             return self.__sector_to_company
         
         sector_to_company = {}
-        sectors = self.crawl_sector_to_urls().keys()
+        sectors = super().crawl_sector_to_urls().keys()
         
         for sector in sectors:
             companies = self.crawl_company_in(sector)
@@ -157,6 +157,8 @@ class CompanyCrawler(URLCrawler):
     def scrap_financial_statements_all_company(self) -> Dict[str, FinancialStatements]:
         '''
         :return: 모든 기업의 재무재표 정보
+
+        ex) {'종목코드1' : [2020년 재무재표, 2021년 재무재표, 2022년 재무재표], '종목코드2' : [2020년 재무재표, 2021년 재무재표, 2022년 재무재표], ... }
 
         재무재표가 있는 모든 기업들의 주요재무정보를 가져온다.
         '''
