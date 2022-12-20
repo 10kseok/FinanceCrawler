@@ -1,12 +1,16 @@
 from peewee import *
 import DBAccessInfo
 
-mysql_db = MySQLDatabase(**DBAccessInfo.access_info)
+# mysql_db = MySQLDatabase(**DBAccessInfo.access_info)
+db = SqliteDatabase('stocks.db')
 
+# class BaseModel(Model):
+#     class Meta:
+#         database = mysql_db
 
 class BaseModel(Model):
     class Meta:
-        database = mysql_db
+        database = db
 
 
 class Sector(BaseModel):
@@ -52,3 +56,7 @@ class FinancialStatements(BaseModel):
 
 if __name__ == "__main__":
     pass
+    # db 파일 생성 및 테이블 생성
+    # db.connect()
+    # db.create_tables([Sector, Stock, Company, FinancialStatements])
+    # db.close()

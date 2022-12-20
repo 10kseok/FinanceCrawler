@@ -1,23 +1,23 @@
 from FinanceCrawler import *
 
-class DataRefiner:
+class DataFetcher:
     def __init__(self) -> None:
         self.stock_crawler = StockCrawler()
         self.company_crawler = CompanyCrawler()
         self.url_crawler = URLCrawler()
 
-    def get_Sectors(self) -> list([Sector]):
+    def fetch_Sectors(self) -> list([Sector]):
         sectors = []
         sector_to_url = self.url_crawler.get_sector_to_url().items()
 
         for sector_name, sector_url in sector_to_url:
             sid = sector_url.split("=")[-1]
-            sector = Sector(sector_id= sid, sector_name= sector_name)
+            sector = Sector(sector_id=sid, sector_name=sector_name)
             sectors.append(sector)
 
         return sectors 
 
-    def get_Stocks(self) -> list([Stock]):
+    def fetch_Stocks(self) -> list([Stock]):
         stocks = []
         stock_codes = self.company_crawler.get_company_to_stock_code().values()
 
@@ -25,12 +25,12 @@ class DataRefiner:
             self.stock_crawler.set_stock_code(stock_code)
             volume = self.stock_crawler.get_volume()
             marketsum = self.stock_crawler.get_marketsum()
-            stock = Stock(stock_code= stock_code, volume= volume, marketsum= marketsum)
+            stock = Stock(stock_code=stock_code, volume= volume, marketsum=marketsum)
             stocks.append(stock)
 
         return stocks
 
-    def get_Companies(self) -> list([Company]):
+    def fetch_Companies(self) -> list([Company]):
         companies = []
         company_to_stock_code = self.company_crawler.get_company_to_stock_code().items()
         sector_to_id = self.url_crawler.get_sector_to_id()
@@ -38,12 +38,12 @@ class DataRefiner:
         for company_name, stock_code in company_to_stock_code:
             sector = self.company_crawler.find_sector_of(company_name)
             if self.is_valid(sector):
-                company = Company(stock_code= stock_code, company_name= company_name, sector_id= sector_to_id[sector])
+                company = Company(stock_code=stock_code, company_name=company_name, sector_id=sector_to_id[sector])
                 companies.append(company)
 
         return companies
 
-    def get_Financial_statements(self) -> FinancialStatements:
+    def fetch_Financial_statements(self) -> FinancialStatements:
         stock_codes = self.company_crawler.get_company_to_stock_code().values()
         FSs = []
 
@@ -56,7 +56,7 @@ class DataRefiner:
                         year = int(f.name[1][:4])
                     except:
                         # If Not Company ETF, ETN etc .. 
-                        print("You should get away. get ")
+                        print(f"{stock_code}는 최근 3년치 재무재표가 존재하지 않습니다.")
                     else:
                         # Nan값처리(ex_ 배당 안하는 기업들)
                         for i in range(len(f)):
@@ -90,11 +90,11 @@ class DataRefiner:
         return sector == True
 
 if __name__ == "__main__":
-    dr = DataRefiner()
-    sectors = dr.get_Sectors()
-    stocks = dr.get_Stocks()
-    companies = dr.get_Companies()
-    financial_statements = dr.get_Financial_statements()
+    dr = DataFetcher()
+    sectors = dr.fetch_Sectors()
+    stocks = dr.fetch_Stocks()
+    companies = dr.fetch_Companies()
+    financial_statements = dr.fetch_Financial_statements()
 
     # MARK: DB에 데이터 저장과정
     # mysql_db.connect()
